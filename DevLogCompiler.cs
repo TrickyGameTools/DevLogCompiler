@@ -22,15 +22,38 @@
 // 	to the project the exceptions are needed for.
 // Version: 18.11.16
 // EndLic
-﻿using System;
+
+using System;
 using TrickyUnits;
 
 namespace DevLogCompiler
 {
     class MainClass
     {
+        static string _workspace;
+
+        static public string WorkSpace{ get{
+                if (_workspace != "") return _workspace;
+                var c = Dirry.C("$AppSupport$/.DevlogConfig.GINI");
+                if (!System.IO.File.Exists(c)) { Console.WriteLine("No config!"); throw new Exception("No Config!"); }
+                var g = GINI.ReadFromFile(c);
+                _workspace = g.C("WORKSPACE");
+                if (_workspace == "") { throw new Exception("Workspace not defined!"); }
+                return _workspace;
+            }}
+
+        public static bool Yes(string Question){
+            Console.Write($"{Question} ? <Y/N> ");
+            var k = Console.ReadKey();
+            return k.KeyChar == 'Y' || k.KeyChar == 'y';
+        }
+
         public static void Main(string[] args)
         {
+            Dirry.C("$AppSupport"); // Just forces MKL to be properly set :P
+            QOpen.Hello();
+            qstr.Chr(1);
+            Compile.Hi();
             MKL.Lic    ("DevLog Compiler - DevLogCompiler.cs","GNU General Public License 3");
             MKL.Version("DevLog Compiler - DevLogCompiler.cs","18.11.16");
             Console.WriteLine($"DevLog - version {MKL.Newest}");
@@ -46,6 +69,9 @@ namespace DevLogCompiler
                 return;
             } 
             switch (args[0].ToUpper()){
+                case "C": if (args.Length != 2) { Console.WriteLine("Invalid command line input!"); return; }
+                    Compile.Go($"{WorkSpace}/Projects/{args[1]}");
+                    break;
                 case "V": Console.WriteLine($"\n{MKL.All()}"); break;
                 default: Console.WriteLine("Unknown command switch"); break;
             }

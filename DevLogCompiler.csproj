@@ -46,6 +46,10 @@
     <Compile Include="..\TrickyUnits\qstream.cs">
       <Link>qstream.cs</Link>
     </Compile>
+    <Compile Include="..\TrickyUnits\Dirry.cs">
+      <Link>Dirry.cs</Link>
+    </Compile>
+    <Compile Include="Compile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
