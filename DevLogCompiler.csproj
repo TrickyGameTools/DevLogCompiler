@@ -34,6 +34,18 @@
   <ItemGroup>
     <Compile Include="DevLogCompiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\TrickyUnits\GINI Is Not Ini.cs">
+      <Link>GINI Is Not Ini.cs</Link>
+    </Compile>
+    <Compile Include="..\TrickyUnits\mkl.cs">
+      <Link>mkl.cs</Link>
+    </Compile>
+    <Compile Include="..\TrickyUnits\qstr.cs">
+      <Link>qstr.cs</Link>
+    </Compile>
+    <Compile Include="..\TrickyUnits\qstream.cs">
+      <Link>qstream.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
