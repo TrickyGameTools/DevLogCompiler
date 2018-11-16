@@ -22,6 +22,9 @@
 // 	to the project the exceptions are needed for.
 // Version: 18.11.17
 // EndLic
+
+#define MaxLine    
+
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -37,6 +40,9 @@ namespace DevLogCompiler
 
     public class Compile
     {
+#if MaxLine
+        const int MaxLine = 30000;
+#endif
         //static readonly SortedDictionary<int, TIndex> Indexes = new SortedDictionary<int, TIndex>();
         static TIndex Index;
         static public void Hi(){
@@ -47,19 +53,37 @@ namespace DevLogCompiler
 
         static string GetLine(QuickStream bin){
             var ret = "";
-            while(true){
+            var wt = 0;
+            var allow = true;
+            while (true)
+            {
                 var x = bin.ReadByte();
-                if (x == 10 && ret.Trim()!="") break; 
-
-                ret += qstr.Chr((byte)x);
+                if (x == 10 && qstr.Left(ret, 1) == "#") ret = "";
+                if (x == 10 && ret.Trim() != "") break;
+                if (x == 10) allow = true;
+                if (allow) ret += qstr.Chr((byte)x);
                 if (bin.EOF) break;
+                wt++;
+                if (wt > 10000)
+                {
+                    //Console.WriteLine($"Is a string loading cycle this long normal?\n{ret.Length}>{ret}"); 
+                    Process(bin);
+                    wt = 0;
+                }
+#if MaxLine
+                if (ret.Length>MaxLine){
+                    Console.WriteLine($"WARNING! There's a line exceeding the maximum allowed size of {MaxLine} characters! Gonna ignore it!");
+                    allow = false;
+                    ret = "";
+                }
+                    #endif
             }
             Process(bin);
             return ret.Trim();
         }
 
         static void Process(QuickStream bt){
-            Console.Write($"{Math.Round(((double)bt.Position / (double)bt.Size) * 100)}%\r");
+            Console.Write($"\t{Math.Round(((double)bt.Position / (double)bt.Size) * 100)}%\r");
         }
 
 
@@ -76,28 +100,43 @@ namespace DevLogCompiler
             Console.WriteLine($"Compiling entries for project: {file}");
             while(!bin.EOF){
                 var sline = GetLine(bin);
+#if DEBUG
+                Console.WriteLine($"Compiling line: {sline}");
+#endif
                 var p = sline.IndexOf(':');
-                var key = sline;
+                var key = sline.Trim().ToUpper();
                 var value = "";
                 if (p>-1){
                     key = sline.Substring(0, p).Trim().ToUpper();
                     value = sline.Substring(p + 1).Trim();
                 }
                 if (key=="NEW"){
-                    if (Index != null) Console.WriteLine("Warning! New Record started while the old one wasn't properly pushed! This will lead to unreachable data!");
+                    if (Index != null) Console.WriteLine($"Warning! New Record ({value}) started while the old one ({Index.id}) wasn't properly pushed! This will lead to unreachable data!");
                     Index = new TIndex();
                     Index.id = qstr.ToInt(value);
                     Index.offset = bcn.Position;
                 }
-                if (key=="PUSH"){
+                if (key == "PUSH")
+                {
+                    if (Index == null) { Console.WriteLine("WARNING! Pushing without a created index! Expect an exception in three-two-one..."); }
                     bix.WriteByte(0);
                     bix.WriteInt(Index.id);
                     bix.WriteLong(Index.size);
                     bix.WriteLong(Index.offset);
                     bcn.WriteString(Index.data, true);
+                    Index = null;
+                } else if (sline=="") {
+                    // Nothing happens, but this doesn't spook up the rest :P
                 } else if (value=="") {
                     Console.WriteLine($"Invalid>{sline}");
                 } else {
+                    if (Index == null)
+                    {
+                        Console.WriteLine($"WARNING! Definition without a new index creation >{sline}<\nExpect an exception soon!");
+#if DEBUG
+                        Console.ReadKey();
+#endif
+                    }
                     rec++;
                     byte[] lkey = BitConverter.GetBytes(key.Length);
                     byte[] lval = BitConverter.GetBytes(value.Length);

@@ -30,26 +30,38 @@ namespace DevLogCompiler
 {
     class MainClass
     {
-        static string _workspace;
+        static string _workspace = "";
 
-        static public string WorkSpace{ get{
+        static public string WorkSpace
+        {
+            get
+            {
                 if (_workspace != "") return _workspace;
                 var c = Dirry.C("$AppSupport$/.DevlogConfig.GINI");
                 if (!System.IO.File.Exists(c)) { Console.WriteLine("No config!"); throw new Exception("No Config!"); }
                 var g = GINI.ReadFromFile(c);
                 _workspace = g.C("WORKSPACE");
                 if (_workspace == "") { throw new Exception("Workspace not defined!"); }
+                Console.WriteLine($"Workspace set to {_workspace}");
                 return _workspace;
-            }}
+            }
+        }
 
-        public static bool Yes(string Question){
+        public static bool Yes(string Question)
+        {
             Console.Write($"{Question} ? <Y/N> ");
             var k = Console.ReadKey();
+            Console.WriteLine("");
             return k.KeyChar == 'Y' || k.KeyChar == 'y';
         }
 
-        public static void Main(string[] args)
+        public static void Main(string[] getargs)
         {
+#if DEBUG
+            string[] args = { "C","Test" };
+#else
+            string[] args = getargs;
+#endif
             Dirry.C("$AppSupport"); // Just forces MKL to be properly set :P
             QOpen.Hello();
             qstr.Chr(1);
