@@ -20,7 +20,7 @@
 // 		
 // 	Exceptions to the standard GNU license are available with Jeroen's written permission given prior 
 // 	to the project the exceptions are needed for.
-// Version: 18.11.16
+// Version: 18.11.17
 // EndLic
 using System;
 using System.Text;
@@ -40,7 +40,7 @@ namespace DevLogCompiler
         //static readonly SortedDictionary<int, TIndex> Indexes = new SortedDictionary<int, TIndex>();
         static TIndex Index;
         static public void Hi(){
-            MKL.Version("DevLog Compiler - Compile.cs","18.11.16");
+            MKL.Version("DevLog Compiler - Compile.cs","18.11.17");
             MKL.Lic    ("DevLog Compiler - Compile.cs","GNU General Public License 3");
         }
         static bool Yes(string Question) => MainClass.Yes(Question);

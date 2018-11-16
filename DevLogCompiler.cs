@@ -20,7 +20,7 @@
 // 		
 // 	Exceptions to the standard GNU license are available with Jeroen's written permission given prior 
 // 	to the project the exceptions are needed for.
-// Version: 18.11.16
+// Version: 18.11.17
 // EndLic
 
 using System;
@@ -55,7 +55,7 @@ namespace DevLogCompiler
             qstr.Chr(1);
             Compile.Hi();
             MKL.Lic    ("DevLog Compiler - DevLogCompiler.cs","GNU General Public License 3");
-            MKL.Version("DevLog Compiler - DevLogCompiler.cs","18.11.16");
+            MKL.Version("DevLog Compiler - DevLogCompiler.cs","18.11.17");
             Console.WriteLine($"DevLog - version {MKL.Newest}");
             Console.WriteLine($"(c) Jeroen P. Broks 2018-20{qstr.Left(MKL.Newest,2)}");
 #if DEBUG
