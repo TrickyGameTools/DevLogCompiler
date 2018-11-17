@@ -144,7 +144,10 @@ namespace DevLogCompiler
                     byte[] bval = Encoding.UTF8.GetBytes(value);
                     byte[][] bufs = { lkey, bkey, lval, bval };
                     Index.data+=qstr.Chr(0); //bcn.WriteByte(0);
-                    foreach (byte[] buf in bufs) foreach (byte b in buf) Index.data+=qstr.Chr(b);
+                    foreach (byte[] buf in bufs) foreach (byte b in buf) {
+						Index.data+=qstr.Chr(b);
+						if (buf.Length!=4 && (b<32 || b>127)) Console.WriteLine($"WARNING! I do not trust character #{b} that is now in the output!")
+					}
                 }                 
             }
             bin.Close();
