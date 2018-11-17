@@ -76,7 +76,7 @@ namespace DevLogCompiler
             if (args.Length==0){
                 Console.WriteLine("\n\n");
                 Console.WriteLine("DevLogCompiler c <project> - Compiles Project Into Binary form");
-                Console.WriteLine("DevLogCompiler d <project> - Decompiles Project From Binary form back to text form");
+               //Console.WriteLine("DevLogCompiler d <project> - Decompiles Project From Binary form back to text form");
                 Console.WriteLine("DevlogCompiler v           - Full version information");
                 return;
             } 
