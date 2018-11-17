@@ -143,7 +143,7 @@ namespace DevLogCompiler
                     byte[] bkey = Encoding.UTF8.GetBytes(key);
                     byte[] bval = Encoding.UTF8.GetBytes(value);
                     byte[][] bufs = { lkey, bkey, lval, bval };
-                    bcn.WriteByte(0);
+                    Index.data+=qstr.Chr(0); //bcn.WriteByte(0);
                     foreach (byte[] buf in bufs) foreach (byte b in buf) Index.data+=qstr.Chr(b);
                 }                 
             }
