@@ -32,10 +32,59 @@ using TrickyUnits;
 namespace DevLogCompiler
 {
     class TIndex{
-        public int id;
-        public long size { get => data.Length; }
-        public long offset;
-        public string data;
+        //QuickStream IkWeetHetNietMeer;
+        public int id=-10;
+        public long size { get  { 
+				long q=1;
+				foreach(string k in D.Keys) q+=4+k.Length+D[k].Length;
+				return q;
+			}
+		}
+        public long offset=0;
+        /*
+        public string data //="";
+        {
+			get{
+				if (IkWeetHetNietMeer==null) return "";
+				IkWeetHetNietMeer.Close();
+				IkWeetHetNietMeer=QOpen.ReadFile(Dirry.C("$AppSupport$/DVCTEMPFILE.BIN"));
+				IkWeetHetNietMeer.Position=0;
+				var ret= IkWeetHetNietMeer.ReadString((int)IkWeetHetNietMeer.Size);
+				IkWeetHetNietMeer.Close();
+				IkWeetHetNietMeer=null;
+				return ret;
+			}
+		}
+        
+        public void AddNull(){
+			if (IkWeetHetNietMeer==null) IkWeetHetNietMeer=QOpen.WriteFile(Dirry.C("$AppSupport$/DVCTEMPFILE.BIN"));
+			IkWeetHetNietMeer.WriteByte(0);
+		}
+		
+        public void AddData(string mystring){
+			Console.WriteLine($"Writing {mystring}");
+			if (IkWeetHetNietMeer==null) IkWeetHetNietMeer=QOpen.WriteFile(Dirry.C("$AppSupport$/DVCTEMPFILE.BIN"));
+			IkWeetHetNietMeer.Position=IkWeetHetNietMeer.Size;
+			IkWeetHetNietMeer.WriteString(mystring);
+		}
+		
+		~TIndex(){
+			if (IkWeetHetNietMeer!=null){
+				IkWeetHetNietMeer.Close();
+				System.IO.File.Delete(Dirry.C("$AppSupport$/DVCTEMPFILE.BIN"));
+			}
+		}
+		*/
+		SortedDictionary<string,string> D = new SortedDictionary<string,string>();
+		public void Def(string key,string value){ D[key]=value; }
+		public void DataWrite(QuickStream f){
+			foreach(string key in D.Keys){
+				f.WriteByte(0);
+				f.WriteString(key);
+				f.WriteString(D[key]);
+				//Console.WriteLine($"Writing string {key} => {D[key]}");
+			}
+		}
     }
 
     public class Compile
@@ -113,6 +162,8 @@ namespace DevLogCompiler
                 if (key=="NEW"){
                     if (Index != null) Console.WriteLine($"Warning! New Record ({value}) started while the old one ({Index.id}) wasn't properly pushed! This will lead to unreachable data!");
                     Index = new TIndex();
+                    Index.Def("ZZZZ","END");
+                    Index.Def("ZZZA","END");
                     Index.id = qstr.ToInt(value);
                     Index.offset = bcn.Position;
                 }
@@ -123,11 +174,12 @@ namespace DevLogCompiler
                     bix.WriteInt(Index.id);
                     bix.WriteLong(Index.size);
                     bix.WriteLong(Index.offset);
-                    bcn.WriteString(Index.data, true);
+                    //bcn.WriteString(Index.data, true);
+                    Index.DataWrite(bcn);
                     Index = null;
                 } else if (sline=="") {
                     // Nothing happens, but this doesn't spook up the rest :P
-                } else if (value=="") {
+                } else if (value=="" && qstr.Right(sline,1)!=":") {
                     Console.WriteLine($"Invalid>{sline}");
                 } else {
                     if (Index == null)
@@ -136,19 +188,49 @@ namespace DevLogCompiler
 #if DEBUG
                         Console.ReadKey();
 #endif
-                    }
+                    }                    
                     rec++;
-                    byte[] lkey = BitConverter.GetBytes(key.Length);
-                    byte[] lval = BitConverter.GetBytes(value.Length);
+                    /*
                     byte[] bkey = Encoding.UTF8.GetBytes(key);
                     byte[] bval = Encoding.UTF8.GetBytes(value);
+                    byte[] lkey = BitConverter.GetBytes(bkey.Length);
+                    byte[] lval = BitConverter.GetBytes(bval.Length);
                     byte[][] bufs = { lkey, bkey, lval, bval };
+                    int[] bsize = {4,bkey.Length,4,bval.Length};
+                    if (lkey.Length!=4) Console.WriteLine($"Invalid key length {lkey.Length}");
+                    if (lval.Length!=4) Console.WriteLine($"Invalid value length {lval.Length}");
+                    int old=0;
+                    if (Index.data != "" && Index.data!=null)
+                    {
+                        old = 
+                            Index.data.Length;
+                    }
+                    //Console.WriteLine($"{key.Length} {key} => {value.Length} {value}");
                     Index.data+=qstr.Chr(0); //bcn.WriteByte(0);
-                    foreach (byte[] buf in bufs) foreach (byte b in buf) {
-						Index.data+=qstr.Chr(b);
-						if (buf.Length!=4 && (b<32 || b>127)) Console.WriteLine($"WARNING! I do not trust character #{b} that is now in the output!")
+                    var ci=-1;
+                    foreach (byte[] buf in bufs) {
+						ci++;
+						var chk=0;
+						foreach (byte b in buf) {
+							if (buf.Length!=4 && (b<32 || b>127)) {
+								Console.WriteLine($"{Index.id}: WARNING! I do not trust character #{b}({qstr.Chr(b)}) that is now in the output! {key}='{value}' (replaced with '?')");
+								Index.data+="?";
+								chk++;
+							} else { 
+								Index.data+=qstr.Chr(b);
+								chk++;
+							}
+						}
+						if (chk!=bsize[ci]) Console.WriteLine($"{Index.id}: WARNING! Buffer oddity {chk}!={bsize[ci]} ({ci})");						
 					}
-                }                 
+                    var mustbe = lkey.Length + lval.Length + bkey.Length + bval.Length + old +1;
+                    if (Index.data.Length!=mustbe) Console.WriteLine($"{Index.id}: WARNING! Buffer output sizes are NOT correct!   {Index.data.Length}!={mustbe}");
+					//Index.size=Index.data.Length;
+					// */
+					//Index.AddData(key);
+					//Index.AddData(value);
+					Index.Def(key,value);
+                }
             }
             bin.Close();
             bix.Close();
